@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -35,7 +36,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
@@ -46,5 +50,49 @@ import androidx.work.WorkManager
 import com.cs4520.assignment5.R
 
 class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    MyNavHost()
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun MyNavHost() {
+        val navController = rememberNavController()
+        NavHost(navController = navController, startDestination = "home") {
+            composable("home") {
+                Home(onNavigateToCreate = { navController.navigate("create") })
+            }
+            composable("create") {
+                Create()
+            }
+        }
+    }
+
+    @Composable
+    fun Home(onNavigateToCreate: () -> Unit){
+        Column (modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
+            val context = LocalContext.current
+            Text("RemindMe")
+            Button(onClick = {
+                onNavigateToCreate()}) {
+                Text("Create Reminder")
+            }
+            Button(onClick = {
+                    onNavigateToCreate()}) {
+                Text("View Reminders")
+            }
+        }
+    }
+    @Composable
+    fun Create(){
+        Text("Placeholder")
+    }
 
 }
