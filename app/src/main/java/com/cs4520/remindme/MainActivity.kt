@@ -67,16 +67,22 @@ class MainActivity : ComponentActivity() {
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = "home") {
             composable("home") {
-                Home(onNavigateToCreate = { navController.navigate("create") })
+                Home(onNavigateToCreate = { navController.navigate("create") }, onNavigateToList = {navController.navigate("list")})
             }
             composable("create") {
                 Create()
+            }
+            composable("list"){
+                List()
+            }
+            composable("detail"){
+                Detail()
             }
         }
     }
 
     @Composable
-    fun Home(onNavigateToCreate: () -> Unit){
+    fun Home(onNavigateToCreate: () -> Unit, onNavigateToList: () -> Unit){
         Column (modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
             val context = LocalContext.current
             Text("RemindMe")
@@ -85,7 +91,7 @@ class MainActivity : ComponentActivity() {
                 Text("Create Reminder")
             }
             Button(onClick = {
-                    onNavigateToCreate()}) {
+                    onNavigateToList()}) {
                 Text("View Reminders")
             }
         }
@@ -93,6 +99,16 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun Create(){
         Text("Placeholder")
+    }
+
+    @Composable
+    fun List(){
+        Text("Placeholder2")
+    }
+
+    @Composable
+    fun Detail(){
+        Text("Placeholder3")
     }
 
 }
