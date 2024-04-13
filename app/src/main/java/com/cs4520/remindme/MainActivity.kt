@@ -22,6 +22,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExposedDropdownMenuBox
+import androidx.compose.material.ExposedDropdownMenuDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -40,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
@@ -73,7 +78,7 @@ class MainActivity : ComponentActivity() {
                 Create()
             }
             composable("list"){
-                List()
+                List(onNavigateToDetail = { navController.navigate("detail") })
             }
             composable("detail"){
                 Detail()
@@ -96,19 +101,103 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     fun Create(){
-        Text("Placeholder")
+        var nameText by remember { mutableStateOf("")}
+        var descText by remember { mutableStateOf("")}
+        val categories = arrayOf("Home", "Work", "Family", "Personal")
+        var expanded by remember { mutableStateOf(false)}
+        var selectedCategory by remember { mutableStateOf(categories[0])}
+
+        Column (
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally)
+        {
+            TextField(
+                value = nameText,
+                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { nameText = it },
+                label = { Text("Name")})
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded})
+            {
+                TextField(
+                    value = selectedCategory,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)}
+                )
+                
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false})
+                {
+                    categories.forEach { item ->
+                        DropdownMenuItem(
+                            content = { -> Text(text = item)},
+                            onClick = {
+                                selectedCategory = item
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            TextField(
+                value = descText,
+                modifier = Modifier.fillMaxWidth().height(400.dp),
+                onValueChange = { descText = it },
+                label = { Text("Description")})
+
+            Button(onClick = {}) {
+                Text("Create")
+            }
+        }
     }
 
     @Composable
-    fun List(){
-        Text("Placeholder2")
+    fun List(onNavigateToDetail: () -> Unit){
+        Column() {
+            Text("Placeholder2")
+            Button(onClick = {
+                onNavigateToDetail()}) {
+                Text("Get Details")
+            }
+        }
     }
 
     @Composable
     fun Detail(){
-        Text("Placeholder3")
+        Column (
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally)
+        {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center)
+            {
+                Text(
+                    text = "Name",
+                    modifier = Modifier.width(100.dp),
+                    textAlign = TextAlign.Center)
+                Image(
+                    painter = painterResource(R.drawable.equipment),
+                    contentDescription = "category image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(20.dp).padding(0.dp)
+                )
+            }
+            Text(
+                text = "Description content\nDescription content\nDescription content\nDescription content\nDescription content\nDescription content\n",
+                modifier = Modifier.height(400.dp))
+        }
     }
 
 }
