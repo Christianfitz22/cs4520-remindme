@@ -9,6 +9,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
@@ -105,7 +107,8 @@ class MainActivity : ComponentActivity() {
                     .width(375.dp)
                     .background(color = Color(0xFFADD8E6),
                         shape = RoundedCornerShape(16.dp))
-            ) {Text(
+            ) {
+                Text(
                 text = "RemindMe",
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
@@ -163,32 +166,42 @@ class MainActivity : ComponentActivity() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded})
-            {
-                TextField(
-                    value = selectedCategory,
-                    modifier = Modifier.width(300.dp),
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)}
-                )
-                
-                ExposedDropdownMenu(
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min).width(IntrinsicSize.Max)
+            ) {
+                ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false})
+                    onExpandedChange = { expanded = !expanded})
                 {
-                    categories.forEach { item ->
-                        DropdownMenuItem(
-                            content = { -> Text(text = item)},
-                            onClick = {
-                                selectedCategory = item
-                                expanded = false
-                            }
-                        )
+                    TextField(
+                        value = selectedCategory,
+                        modifier = Modifier.width(244.dp),
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)}
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false})
+                    {
+                        categories.forEach { item ->
+                            DropdownMenuItem(
+                                content = { -> Text(text = item)},
+                                onClick = {
+                                    selectedCategory = item
+                                    expanded = false
+                                }
+                            )
+                        }
                     }
                 }
+
+                Image(
+                    modifier = Modifier.size(56.dp)
+                        .padding(start = 8.dp, end = 8.dp),
+                    painter = painterResource(id = CategoryToImage(Category.valueOf(selectedCategory.toUpperCase()))),
+                    contentDescription = "Reminder Category Symbol")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -232,7 +245,7 @@ class MainActivity : ComponentActivity() {
             Image(
                 modifier = Modifier.size(56.dp)
                 .padding(end = 8.dp),
-                painter = painterResource(id = if (reminder.category.value == "Food") R.drawable.food else R.drawable.equipment),
+                painter = painterResource(id = CategoryToImage(reminder.category)),
                 contentDescription = "Reminder Category Symbol")
 
                 Text(
@@ -245,12 +258,10 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                Button(onClick = { reminderSelected(reminder, onNavigateToDetail) }, modifier = Modifier.padding(end = 8.dp)) {
-                    Text("Get Details")
-                }
-
-                Button(onClick = { deleteReminder() }) {
-                    Text("Delete")
+                Button(
+                    onClick = { reminderSelected(reminder, onNavigateToDetail) },
+                    modifier = Modifier.padding(end = 8.dp)) {
+                    Text("...")
                 }
             }
 
@@ -265,6 +276,22 @@ class MainActivity : ComponentActivity() {
         TODO("Not yet implemented")
     }
 
+    fun CategoryToImage(category: Category): Int {
+        if (category == Category.HOME) {
+            return R.drawable.home_120
+        }
+        else if (category == Category.WORK) {
+            return R.drawable.custom_apps_120
+        }
+        else if (category == Category.FAMILY) {
+            return R.drawable.groups_120
+        }
+        else if (category == Category.PERSONAL) {
+            return R.drawable.user_120
+        }
+        return 0
+    }
+
 
     @Composable
     fun Detail(){
@@ -273,30 +300,31 @@ class MainActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally)
         {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .border(2.dp, Color(0xFF4B0082), shape = RoundedCornerShape(4.dp))
-                        .padding(8.dp)
-                ) {
-                    Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically)
-                    {
-                        Text(
-                            text = selectedReminder.name,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center)
-                        Image(
-                            painter = painterResource(R.drawable.equipment),
-                            contentDescription = "category image",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(50.dp).padding(8.dp))
-                    }
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .border(2.dp, Color(0xFF4B0082), shape = RoundedCornerShape(4.dp))
+                    .padding(8.dp)
+            )
+            {
+                Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically)
+                {
+                    Text(
+                        text = selectedReminder.name,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center)
+                    Image(
+                        painter = painterResource(CategoryToImage(selectedReminder.category)),
+                        contentDescription = "category image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.size(50.dp).padding(8.dp))
                 }
+            }
             Box(contentAlignment = Alignment.Center,
             modifier = Modifier
                 .padding(8.dp)
@@ -304,11 +332,17 @@ class MainActivity : ComponentActivity() {
                 .padding(8.dp)
                 .height(200.dp)
                 .width(500.dp)
-            ) {
+            )
+            {
                 Text(
                     text = selectedReminder.description,
                     fontSize = 18.sp,
-                    modifier = Modifier.height(400.dp))}
-        }
+                    modifier = Modifier.height(400.dp))
+            }
+
+            Button(onClick = { /*deleteReminder()*/ }) {
+                Text("Delete")
+            }
         }
     }
+}
