@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -163,6 +164,16 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun List(onNavigateToDetail: () -> Unit){
+        val sampleReminder1 = ReminderEntry("test1", ReminderCategory.Home, "test1desc")
+        val sampleReminder2 = ReminderEntry("test2", ReminderCategory.Family, "test2desc")
+        val sampleReminder3 = ReminderEntry("test3", ReminderCategory.Personal, "test3desc")
+        val sampleData = arrayOf(sampleReminder1, sampleReminder2, sampleReminder3)
+
+        LazyColumn {
+            items(items = sampleData) { data -> ReminderEntryParse(data)}
+        }
+
+        /*
         Column() {
             Text("Placeholder2")
             Button(onClick = {
@@ -170,33 +181,77 @@ class MainActivity : ComponentActivity() {
                 Text("Get Details")
             }
         }
+         */
     }
 
     @Composable
-    fun Detail(){
+    fun ReminderEntryParse(reminderEntry: ReminderEntry) {
+        Row(modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painter = painterResource(CategoryToImage(reminderEntry.category)),
+                contentDescription = "category image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(60.dp)
+            )
+            Text(
+                text = reminderEntry.name,
+                textAlign = TextAlign.Left,
+                modifier = Modifier.fillMaxHeight().fillMaxWidth(0.8f)
+            )
+            Button(
+                onClick = {},
+                modifier = Modifier.width(50.dp).height(50.dp)) {
+                Text("...")
+            }
+        }
+    }
+
+    fun CategoryToImage(category: ReminderCategory): Int {
+        if (category == ReminderCategory.Home) {
+            return R.drawable.home_120
+        }
+        else if (category == ReminderCategory.Work) {
+            return R.drawable.custom_apps_120
+        }
+        else if (category == ReminderCategory.Family) {
+            return R.drawable.groups_120
+        }
+        else if (category == ReminderCategory.Personal) {
+            return R.drawable.user_120
+        }
+        return 0
+    }
+
+    @Composable
+    fun Detail() {
         Column (
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally)
         {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center)
+                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically)
             {
                 Text(
                     text = "Name",
-                    modifier = Modifier.width(100.dp),
+                    modifier = Modifier.width(140.dp).height(IntrinsicSize.Min),
                     textAlign = TextAlign.Center)
                 Image(
                     painter = painterResource(R.drawable.equipment),
                     contentDescription = "category image",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(20.dp).padding(0.dp)
+                    modifier = Modifier.size(60.dp).padding(0.dp)
                 )
             }
             Text(
                 text = "Description content\nDescription content\nDescription content\nDescription content\nDescription content\nDescription content\n",
                 modifier = Modifier.height(400.dp))
+            Button(onClick = {}) {
+                Text("Delete")
+            }
         }
     }
 
