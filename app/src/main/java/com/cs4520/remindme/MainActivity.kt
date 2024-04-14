@@ -1,16 +1,16 @@
 package com.cs4520.remindme
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,10 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
@@ -32,7 +31,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,16 +40,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelProvider
+import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.room.Room
-import androidx.work.WorkManager
 import com.cs4520.assignment5.R
 
 class MainActivity : ComponentActivity() {
@@ -67,6 +62,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    //change to reminders = fetch from database when implemented
+    private val dummyReminders = listOf(
+        Reminder("Meeting", Category.WORK, "Attend the weekly team meeting"),
+        Reminder("Groceries", Category.PERSONAL, "Buy milk, eggs, and bread"),
+        Reminder("Birthday", Category.FAMILY, "Buy a gift for John's birthday"),
+        Reminder("Dishes", Category.HOME, "Do the dishes")
+    )
+
+    private lateinit var selectedReminder: Reminder
+
     @Composable
     fun MyNavHost() {
         val navController = rememberNavController()
@@ -78,19 +83,38 @@ class MainActivity : ComponentActivity() {
                 Create()
             }
             composable("list"){
-                List(onNavigateToDetail = { navController.navigate("detail") })
+                List(reminders = dummyReminders, onNavigateToDetail = {
+                    navController.navigate("detail")
+                })
             }
-            composable("detail"){
+            composable("detail") {
                 Detail()
             }
+
         }
     }
 
     @Composable
     fun Home(onNavigateToCreate: () -> Unit, onNavigateToList: () -> Unit){
         Column (modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
+
+
+            Box(contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .padding(vertical = 32.dp)
+                    .width(375.dp)
+                    .background(color = Color(0xFFADD8E6),
+                        shape = RoundedCornerShape(16.dp))
+            ) {Text(
+                text = "RemindMe",
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF483D8B),
+                modifier = Modifier.padding(vertical = 32.dp)
+            )}
+            Spacer(modifier = Modifier.height(10.dp))
+
             val context = LocalContext.current
-            Text("RemindMe")
             Button(onClick = {
                 onNavigateToCreate()}) {
                 Text("Create Reminder")
@@ -116,11 +140,28 @@ class MainActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally)
         {
+
+            Box(contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .padding(vertical = 20.dp)
+                    .width(375.dp)
+                    .background(color = Color(0xFFADD8E6),
+                            shape = RoundedCornerShape(16.dp))
+            ) {Text(
+                text = "Create a new reminder",
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF483D8B),
+                modifier = Modifier.padding(vertical = 32.dp)
+            )}
+
             TextField(
                 value = nameText,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.width(300.dp),
                 onValueChange = { nameText = it },
                 label = { Text("Name")})
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             ExposedDropdownMenuBox(
                 expanded = expanded,
@@ -128,6 +169,7 @@ class MainActivity : ComponentActivity() {
             {
                 TextField(
                     value = selectedCategory,
+                    modifier = Modifier.width(300.dp),
                     onValueChange = {},
                     readOnly = true,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)}
@@ -149,9 +191,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
             TextField(
                 value = descText,
-                modifier = Modifier.fillMaxWidth().height(400.dp),
+                modifier = Modifier.width(375.dp).height(400.dp),
                 onValueChange = { descText = it },
                 label = { Text("Description")})
 
@@ -161,16 +205,66 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    //list of all reminders
     @Composable
-    fun List(onNavigateToDetail: () -> Unit){
-        Column() {
-            Text("Placeholder2")
-            Button(onClick = {
-                onNavigateToDetail()}) {
-                Text("Get Details")
+    fun List(reminders: List<Reminder>, onNavigateToDetail: () -> Unit){
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn {
+                itemsIndexed(reminders) { index, reminder ->
+                    Preview(reminder, onNavigateToDetail)
+                }
             }
         }
     }
+
+    //preview of one reminder
+    @Composable
+    fun Preview(reminder: Reminder, onNavigateToDetail: () -> Unit) {
+        val backgroundColor = Color(0xFFE06666)
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+                .background(color = backgroundColor)
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                modifier = Modifier.size(56.dp)
+                .padding(end = 8.dp),
+                painter = painterResource(id = if (reminder.category.value == "Food") R.drawable.food else R.drawable.equipment),
+                contentDescription = "Reminder Category Symbol")
+
+                Text(
+                    text = reminder.name,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(onClick = { reminderSelected(reminder, onNavigateToDetail) }, modifier = Modifier.padding(end = 8.dp)) {
+                    Text("Get Details")
+                }
+
+                Button(onClick = { deleteReminder() }) {
+                    Text("Delete")
+                }
+            }
+
+        }
+    }
+
+    private fun reminderSelected(reminder: Reminder, onNavigateToDetail: () -> Unit) {
+        selectedReminder = reminder
+        run { onNavigateToDetail() }
+    }
+    private fun deleteReminder() {
+        TODO("Not yet implemented")
+    }
+
 
     @Composable
     fun Detail(){
@@ -179,25 +273,42 @@ class MainActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally)
         {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center)
-            {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .border(2.dp, Color(0xFF4B0082), shape = RoundedCornerShape(4.dp))
+                        .padding(8.dp)
+                ) {
+                    Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically)
+                    {
+                        Text(
+                            text = selectedReminder.name,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center)
+                        Image(
+                            painter = painterResource(R.drawable.equipment),
+                            contentDescription = "category image",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.size(50.dp).padding(8.dp))
+                    }
+                }
+            Box(contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .padding(8.dp)
+                .border(2.dp, Color.Blue, shape = RoundedCornerShape(4.dp))
+                .padding(8.dp)
+                .height(200.dp)
+                .width(500.dp)
+            ) {
                 Text(
-                    text = "Name",
-                    modifier = Modifier.width(100.dp),
-                    textAlign = TextAlign.Center)
-                Image(
-                    painter = painterResource(R.drawable.equipment),
-                    contentDescription = "category image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(20.dp).padding(0.dp)
-                )
-            }
-            Text(
-                text = "Description content\nDescription content\nDescription content\nDescription content\nDescription content\nDescription content\n",
-                modifier = Modifier.height(400.dp))
+                    text = selectedReminder.description,
+                    fontSize = 18.sp,
+                    modifier = Modifier.height(400.dp))}
+        }
         }
     }
-
-}
