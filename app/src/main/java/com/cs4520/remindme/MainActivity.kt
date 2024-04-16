@@ -216,6 +216,7 @@ class MainActivity : ComponentActivity() {
                 Text("Create")
                 //TODO: Create Reminder, add to database and API
                 //TODO: Clear fields
+                //TODO: Toast if any fields are empty
             }
         }
     }
@@ -235,6 +236,7 @@ class MainActivity : ComponentActivity() {
     //preview of one reminder
     @Composable
     fun Preview(reminder: Reminder, onNavigateToDetail: () -> Unit) {
+        //TODO: change color based on reminder category
         val backgroundColor = Color(0xFFE06666)
         Row(
             modifier = Modifier
