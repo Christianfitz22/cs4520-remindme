@@ -32,6 +32,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,14 +47,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cs4520.assignment5.R
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var viewModel: ReminderViewModel
+    private lateinit var viewModelFactory: ReminderViewModelFactory
+
+    private lateinit var selectedReminder: Reminder
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModelFactory = ReminderViewModelFactory()
+        viewModel = ViewModelProvider(this, viewModelFactory)[ReminderViewModel::class.java]
 
         setContent {
             MaterialTheme {
@@ -63,16 +74,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    //change to reminders = fetch from database when implemented
-    private val dummyReminders = listOf(
-        Reminder("Meeting", Category.WORK, "Attend the weekly team meeting"),
-        Reminder("Groceries", Category.PERSONAL, "Buy milk, eggs, and bread"),
-        Reminder("Birthday", Category.FAMILY, "Buy a gift for John's birthday"),
-        Reminder("Dishes", Category.HOME, "Do the dishes")
-    )
-
-    private lateinit var selectedReminder: Reminder
 
     @Composable
     fun MyNavHost() {
@@ -85,7 +86,7 @@ class MainActivity : ComponentActivity() {
                 Create()
             }
             composable("list"){
-                List(reminders = dummyReminders, onNavigateToDetail = {
+                List(onNavigateToDetail = {
                     navController.navigate("detail")
                 })
             }
@@ -223,7 +224,9 @@ class MainActivity : ComponentActivity() {
 
     //list of all reminders
     @Composable
-    fun List(reminders: List<Reminder>, onNavigateToDetail: () -> Unit){
+    fun List(onNavigateToDetail: () -> Unit){
+        val reminders by viewModel.ResponseData.observeAsState(listOf())
+
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn {
                 itemsIndexed(reminders) { index, reminder ->
@@ -233,11 +236,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    //preview of one reminder
     @Composable
     fun Preview(reminder: Reminder, onNavigateToDetail: () -> Unit) {
-        //TODO: change color based on reminder category
-        val backgroundColor = Color(0xFFE06666)
+        var backgroundColor = Color(0xFFE06666)
+        if(reminder.category == Category.HOME){
+            backgroundColor = Color(0xFF656FFF)
+        }
+        if(reminder.category == Category.FAMILY){
+            backgroundColor = Color(0xFF4FB55C)
+        }
+        if(reminder.category == Category.PERSONAL){
+            backgroundColor = Color(0xFFBB6BF6)
+        }
         Row(
             modifier = Modifier
                 .padding(16.dp)
