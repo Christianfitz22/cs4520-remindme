@@ -214,6 +214,8 @@ class MainActivity : ComponentActivity() {
 
             Button(onClick = {}) {
                 Text("Create")
+                //TODO: Create Reminder, add to database and API
+                //TODO: Clear fields
             }
         }
     }
@@ -273,10 +275,13 @@ class MainActivity : ComponentActivity() {
         run { onNavigateToDetail() }
     }
     private fun deleteReminder() {
-        TODO("Not yet implemented")
+        TODO("Delete Reminder from List")
+        //TODO: Go back to previous screen
+        //TODO: Remove reminder from database and API
     }
 
     fun CategoryToImage(category: Category): Int {
+        //TODO: Glide Images
         if (category == Category.HOME) {
             return R.drawable.home_120
         }
