@@ -17,8 +17,6 @@ class ReminderViewModel : ViewModel() {
     private val database = ReminderDatabase.getInstance()
 
     fun initialize() {
-        //Log.d("Testing", "init viewmodel")
-
         //createWorkBuilder()
 
         makeApiCall()
@@ -59,7 +57,7 @@ class ReminderViewModel : ViewModel() {
                 }
             }
 
-            //TODO: if list empty, check database as well
+            //TODO: if list empty, check database as well?
         }
     }
 }
