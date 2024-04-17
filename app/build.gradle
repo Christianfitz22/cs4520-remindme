@@ -46,6 +46,8 @@ android {
     }
 }
 
+apply plugin: 'kotlin-kapt'
+
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.8.0'
@@ -78,6 +80,11 @@ dependencies {
     implementation 'androidx.room:room-runtime:2.5.0'
     kapt 'androidx.room:room-compiler:2.5.0'
     implementation 'androidx.room:room-ktx:2.5.0'
+
+    // Glide
+    implementation 'com.github.bumptech.glide:glide:4.14.2'
+    kapt 'com.github.bumptech.glide:compiler:4.14.2'
+    implementation "com.github.bumptech.glide:compose:1.0.0-alpha.3"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
