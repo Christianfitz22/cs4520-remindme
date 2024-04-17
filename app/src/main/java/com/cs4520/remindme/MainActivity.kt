@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -83,7 +84,7 @@ class MainActivity : ComponentActivity() {
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = "home") {
             composable("home") {
-                Home(onNavigateToCreate = { navController.navigate("create") }, onNavigateToList = {navController.navigate("list")})
+                HomeScreen(onNavigateToCreate = { navController.navigate("create") }, onNavigateToList = {navController.navigate("list")})
             }
             composable("create") {
                 Create()
@@ -101,7 +102,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun Home(onNavigateToCreate: () -> Unit, onNavigateToList: () -> Unit){
+    fun HomeScreen(onNavigateToCreate: () -> Unit, onNavigateToList: () -> Unit){
         Column (modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
 
 
@@ -117,17 +118,17 @@ class MainActivity : ComponentActivity() {
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF483D8B),
-                modifier = Modifier.padding(vertical = 32.dp)
+                modifier = Modifier.padding(vertical = 32.dp).testTag("Title")
             )}
             Spacer(modifier = Modifier.height(10.dp))
 
             val context = LocalContext.current
             Button(onClick = {
-                onNavigateToCreate()}) {
+                onNavigateToCreate()}, modifier = Modifier.testTag("Create Button")) {
                 Text("Create Reminder")
             }
             Button(onClick = {
-                    onNavigateToList()}) {
+                    onNavigateToList()}, modifier = Modifier.testTag("List Button")) {
                 Text("View Reminders")
             }
         }
@@ -159,12 +160,12 @@ class MainActivity : ComponentActivity() {
                 fontSize = 25.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF483D8B),
-                modifier = Modifier.padding(vertical = 32.dp)
+                modifier = Modifier.padding(vertical = 32.dp).testTag("Title")
             )}
 
             TextField(
                 value = nameText,
-                modifier = Modifier.width(300.dp),
+                modifier = Modifier.width(300.dp).testTag("Name"),
                 onValueChange = { nameText = it },
                 label = { Text("Name")})
 
@@ -175,11 +176,13 @@ class MainActivity : ComponentActivity() {
             ) {
                 ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onExpandedChange = { expanded = !expanded})
+                    modifier = Modifier.testTag("Category"),
+                    onExpandedChange = { expanded = !expanded}
+                )
                 {
                     TextField(
                         value = selectedCategory,
-                        modifier = Modifier.width(244.dp),
+                        modifier = Modifier.width(244.dp).testTag("Category Chosen"),
                         onValueChange = {},
                         readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)}
@@ -203,7 +206,7 @@ class MainActivity : ComponentActivity() {
 
                 Image(
                     modifier = Modifier.size(56.dp)
-                        .padding(start = 8.dp, end = 8.dp),
+                        .padding(start = 8.dp, end = 8.dp).testTag("Image"),
                     painter = painterResource(id = CategoryToImage(Category.valueOf(selectedCategory.toUpperCase()))),
                     contentDescription = "Reminder Category Symbol")
             }
@@ -212,7 +215,7 @@ class MainActivity : ComponentActivity() {
 
             TextField(
                 value = descText,
-                modifier = Modifier.width(375.dp).height(400.dp),
+                modifier = Modifier.width(375.dp).height(400.dp).testTag("Description"),
                 onValueChange = { descText = it },
                 label = { Text("Description")})
 
@@ -222,7 +225,7 @@ class MainActivity : ComponentActivity() {
                     descText = ""
                     selectedCategory = categories[0]
                 }
-            }) {
+            }, modifier = Modifier.testTag("Create Button")) {
                 Text("Create")
             }
         }
@@ -270,7 +273,7 @@ class MainActivity : ComponentActivity() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                modifier = Modifier.size(56.dp)
+                modifier = Modifier.size(56.dp).testTag("Image")
                 .padding(end = 8.dp),
                 painter = painterResource(id = CategoryToImage(reminder.category)),
                 contentDescription = "Reminder Category Symbol")
@@ -278,7 +281,7 @@ class MainActivity : ComponentActivity() {
                 Text(
                     text = reminder.name,
                     fontSize = 18.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp).testTag("Name")
                 )
 
             Row(
@@ -287,7 +290,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 Button(
                     onClick = { reminderSelected(reminder, onNavigateToDetail) },
-                    modifier = Modifier.padding(end = 8.dp)) {
+                    modifier = Modifier.padding(end = 8.dp).testTag("Button")) {
                     Text("...")
                 }
             }
@@ -295,7 +298,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun reminderSelected(reminder: Reminder, onNavigateToDetail: () -> Unit) {
+    fun reminderSelected(reminder: Reminder, onNavigateToDetail: () -> Unit) {
         selectedReminder = reminder
         run { onNavigateToDetail() }
     }
@@ -358,12 +361,13 @@ class MainActivity : ComponentActivity() {
                         text = selectedReminder.name,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center)
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.testTag("Name"))
                     Image(
                         painter = painterResource(CategoryToImage(selectedReminder.category)),
                         contentDescription = "category image",
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(50.dp).padding(8.dp))
+                        modifier = Modifier.size(50.dp).padding(8.dp).testTag("Image"))
                 }
             }
             Box(contentAlignment = Alignment.Center,
@@ -378,10 +382,10 @@ class MainActivity : ComponentActivity() {
                 Text(
                     text = selectedReminder.description,
                     fontSize = 18.sp,
-                    modifier = Modifier.height(400.dp))
+                    modifier = Modifier.height(400.dp).testTag("Description"))
             }
 
-            Button(onClick = { deleteClicked(onNavigateToList) }) {
+            Button(onClick = { deleteClicked(onNavigateToList) }, modifier = Modifier.testTag("Button")) {
                 Text("Delete")
             }
         }
