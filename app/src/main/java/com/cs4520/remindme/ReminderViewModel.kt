@@ -24,6 +24,7 @@ class ReminderViewModel : ViewModel() {
     }
 
     fun reflectDatabase() {
+        //TODO: coroutines
         val dao = database.reminderDAO();
         val databaseEntries = dao.getData();
 
@@ -52,7 +53,7 @@ class ReminderViewModel : ViewModel() {
 
         viewModelScope.launch(Dispatchers.IO) {
             try{
-                val response = repository.getAllRepository() //TA says that crashing here if nothing is loaded is ok
+                val response = repository.getAllRepository()
                 withContext(Dispatchers.Main) {
                     try {
                         if (response.isSuccessful) {
@@ -81,8 +82,6 @@ class ReminderViewModel : ViewModel() {
                     }
                 }
             }
-
-            //TODO: if list empty, check database as well?
         }
     }
      */
