@@ -298,7 +298,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun reminderSelected(reminder: Reminder, onNavigateToDetail: () -> Unit) {
+    fun reminderSelected(reminder: Reminder, onNavigateToDetail: () -> Unit) {
         selectedReminder = reminder
         run { onNavigateToDetail() }
     }
@@ -361,12 +361,13 @@ class MainActivity : ComponentActivity() {
                         text = selectedReminder.name,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center)
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.testTag("Name"))
                     Image(
                         painter = painterResource(CategoryToImage(selectedReminder.category)),
                         contentDescription = "category image",
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(50.dp).padding(8.dp))
+                        modifier = Modifier.size(50.dp).padding(8.dp).testTag("Image"))
                 }
             }
             Box(contentAlignment = Alignment.Center,
@@ -381,10 +382,10 @@ class MainActivity : ComponentActivity() {
                 Text(
                     text = selectedReminder.description,
                     fontSize = 18.sp,
-                    modifier = Modifier.height(400.dp))
+                    modifier = Modifier.height(400.dp).testTag("Description"))
             }
 
-            Button(onClick = { deleteClicked(onNavigateToList) }) {
+            Button(onClick = { deleteClicked(onNavigateToList) }, modifier = Modifier.testTag("Button")) {
                 Text("Delete")
             }
         }
