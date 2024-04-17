@@ -182,7 +182,7 @@ class MainActivity : ComponentActivity() {
                 {
                     TextField(
                         value = selectedCategory,
-                        modifier = Modifier.width(244.dp),
+                        modifier = Modifier.width(244.dp).testTag("Category Chosen"),
                         onValueChange = {},
                         readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)}
@@ -190,8 +190,7 @@ class MainActivity : ComponentActivity() {
 
                     ExposedDropdownMenu(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false},
-                        modifier = Modifier.testTag("Category dropdown"))
+                        onDismissRequest = { expanded = false})
                     {
                         categories.forEach { item ->
                             DropdownMenuItem(
@@ -218,7 +217,7 @@ class MainActivity : ComponentActivity() {
                 value = descText,
                 modifier = Modifier.width(375.dp).height(400.dp).testTag("Description"),
                 onValueChange = { descText = it },
-                label = { Text("Description", modifier = Modifier.testTag("Description Label"))})
+                label = { Text("Description")})
 
             Button(onClick = {
                 if (createClicked(nameText, descText, selectedCategory)) {
