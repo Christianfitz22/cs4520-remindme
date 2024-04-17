@@ -4,6 +4,6 @@ import retrofit2.Response
 import retrofit2.http.GET
 
 interface APIEndPoint {
-    //@GET(API.ENDPOINT)
-    suspend fun getReminderList() : Response<ArrayList<Reminder>>
+    @GET(API.ENDPOINT)
+    suspend fun getIsDayOff() : Response<String>
 }

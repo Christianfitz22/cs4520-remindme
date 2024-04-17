@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -53,6 +54,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
 import com.cs4520.assignment5.R
 
 class MainActivity : ComponentActivity() {
@@ -70,6 +74,9 @@ class MainActivity : ComponentActivity() {
         viewModelFactory = ReminderViewModelFactory()
         viewModel = ViewModelProvider(this, viewModelFactory)[ReminderViewModel::class.java]
 
+        viewModel.reflectDatabase()
+        viewModel.generateAdvice()
+
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -84,7 +91,12 @@ class MainActivity : ComponentActivity() {
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = "home") {
             composable("home") {
-                HomeScreen(onNavigateToCreate = { navController.navigate("create") }, onNavigateToList = {navController.navigate("list")})
+                Home(onNavigateToCreate = { navController.navigate("create") },
+                    onNavigateToList = {
+                        viewModel.reflectDatabase()
+                        viewModel.generateAdvice()
+                        navController.navigate("list")
+                    })
             }
             composable("create") {
                 Create()
@@ -101,6 +113,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalGlideComposeApi::class)
     @Composable
     fun HomeScreen(onNavigateToCreate: () -> Unit, onNavigateToList: () -> Unit){
         Column (modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
@@ -134,7 +147,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalGlideComposeApi::class)
     @Composable
     fun Create(){
         var nameText by remember { mutableStateOf("")}
@@ -204,11 +217,13 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                Image(
+                GlideImage(
+                    model = CategoryConverter.ToURL(Category.valueOf(selectedCategory.uppercase())),
                     modifier = Modifier.size(56.dp)
                         .padding(start = 8.dp, end = 8.dp).testTag("Image"),
-                    painter = painterResource(id = CategoryToImage(Category.valueOf(selectedCategory.toUpperCase()))),
-                    contentDescription = "Reminder Category Symbol")
+                    contentDescription = "Reminder Category Symbol",
+                    failure = placeholder(CategoryConverter.ToPlaceholder(Category.valueOf(selectedCategory.uppercase())))
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -249,21 +264,29 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun List(onNavigateToDetail: () -> Unit){
         val reminders by viewModel.ResponseData.observeAsState(listOf())
+        val advice by viewModel.AdviceData.observeAsState()
 
-        viewModel.reflectDatabase()
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(text = advice.toString(),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().height(40.dp).wrapContentHeight(Alignment.CenterVertically))
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            LazyColumn {
-                itemsIndexed(reminders) { index, reminder ->
-                    Preview(reminder, onNavigateToDetail)
+            Box(modifier = Modifier.fillMaxSize()) {
+                LazyColumn {
+                    itemsIndexed(reminders) { index, reminder ->
+                        Preview(reminder, onNavigateToDetail)
+                    }
                 }
             }
         }
     }
 
+    @OptIn(ExperimentalGlideComposeApi::class)
     @Composable
     fun Preview(reminder: Reminder, onNavigateToDetail: () -> Unit) {
-        var backgroundColor = CategoryToColor(reminder.category)
+        var backgroundColor = CategoryConverter.ToColor(reminder.category)
         Row(
             modifier = Modifier
                 .padding(16.dp)
@@ -272,10 +295,11 @@ class MainActivity : ComponentActivity() {
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
+            GlideImage(
+                model = CategoryConverter.ToURL(reminder.category),
                 modifier = Modifier.size(56.dp).testTag("Image")
                 .padding(end = 8.dp),
-                painter = painterResource(id = CategoryToImage(reminder.category)),
+                failure = placeholder(CategoryConverter.ToPlaceholder(reminder.category)),
                 contentDescription = "Reminder Category Symbol")
 
                 Text(
@@ -303,40 +327,7 @@ class MainActivity : ComponentActivity() {
         run { onNavigateToDetail() }
     }
 
-    fun CategoryToImage(category: Category): Int {
-        //TODO: Glide Images
-        if (category == Category.HOME) {
-            return R.drawable.home_120
-        }
-        else if (category == Category.WORK) {
-            return R.drawable.custom_apps_120
-        }
-        else if (category == Category.FAMILY) {
-            return R.drawable.groups_120
-        }
-        else if (category == Category.PERSONAL) {
-            return R.drawable.user_120
-        }
-        return 0
-    }
-
-    fun CategoryToColor(category: Category): Color {
-        if (category == Category.HOME) {
-            return Color(0xFF656FFF)
-        }
-        else if (category == Category.WORK) {
-            return Color(0xFFE06666)
-        }
-        else if (category == Category.FAMILY) {
-            return Color(0xFF4FB55C)
-        }
-        else if (category == Category.PERSONAL) {
-            return Color(0xFFBB6BF6)
-        }
-        return Color(0xFF656FFF)
-    }
-
-
+    @OptIn(ExperimentalGlideComposeApi::class)
     @Composable
     fun Detail(onNavigateToList: () -> Unit){
         Column (
@@ -363,8 +354,9 @@ class MainActivity : ComponentActivity() {
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.testTag("Name"))
-                    Image(
-                        painter = painterResource(CategoryToImage(selectedReminder.category)),
+                    GlideImage(
+                        model = CategoryConverter.ToURL(selectedReminder.category),
+                        failure = placeholder(CategoryConverter.ToPlaceholder(selectedReminder.category)),
                         contentDescription = "category image",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.size(50.dp).padding(8.dp).testTag("Image"))
@@ -373,7 +365,7 @@ class MainActivity : ComponentActivity() {
             Box(contentAlignment = Alignment.Center,
             modifier = Modifier
                 .padding(8.dp)
-                .border(2.dp, CategoryToColor(selectedReminder.category), shape = RoundedCornerShape(4.dp))
+                .border(2.dp, CategoryConverter.ToColor(selectedReminder.category), shape = RoundedCornerShape(4.dp))
                 .padding(8.dp)
                 .height(200.dp)
                 .width(500.dp)

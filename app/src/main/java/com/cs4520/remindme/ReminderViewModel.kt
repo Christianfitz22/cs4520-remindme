@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.Response
 import java.net.UnknownHostException
 
 class ReminderViewModel : ViewModel() {
@@ -14,13 +15,16 @@ class ReminderViewModel : ViewModel() {
     val ResponseData : LiveData<ArrayList<Reminder>> = _ResponseData
     //private val repository = DatabaseRepository()
 
+    private val _AdviceData = MutableLiveData<String>()
+    val AdviceData : LiveData<String> = _AdviceData
+
     private val database = ReminderDatabase.getInstance()
 
     fun initialize() {
         //createWorkBuilder()
 
-        //makeApiCall()
         reflectDatabase()
+        generateAdvice()
     }
 
     fun reflectDatabase() {
@@ -41,48 +45,44 @@ class ReminderViewModel : ViewModel() {
 
     fun addReminder(reminder: Reminder) {
         database.reminderDAO().insert(reminder);
+        reflectDatabase()
+        generateAdvice()
     }
 
     fun deleteReminder(reminder: Reminder) {
         database.reminderDAO().delete(reminder);
+        reflectDatabase()
+        generateAdvice()
     }
 
-    /*
-    private fun makeApiCall(input: String?=null) {
-        val dao = database.reminderDAO()
+    fun generateAdvice() {
+
+        _AdviceData.value = ""
+
+        val service = RetrofitClient.getRetrofitInstance()
 
         viewModelScope.launch(Dispatchers.IO) {
-            try{
-                val response = repository.getAllRepository()
-                withContext(Dispatchers.Main) {
-                    try {
-                        if (response.isSuccessful) {
 
-                            _ResponseData.value = response.body()
+            val response: Response<String>
 
-                            _ResponseData.value?.let { dao.insertAll(it) }
-                        } else {
-                            _ResponseData.value?.clear()
-                        }
-                    } catch (e: Throwable) {
-                        _ResponseData.value?.clear()
-                    }
+            try {
+                response = service.getIsDayOff()
+            } catch (e: UnknownHostException) {
+                _AdviceData.postValue("Unable to establish connection to host.")
+                return@launch
+            }
+
+            if (response.isSuccessful) {
+                if (response.body() == "0") {
+                    _AdviceData.postValue("Today's work will make tomorrow's happiness.")
+                } else if (response.body() == "1") {
+                    _AdviceData.postValue("Enjoy relaxing times to the fullest.")
+                } else {
+                    _AdviceData.postValue("Accomplish your goals! Work day or not.")
                 }
-            } catch (e : UnknownHostException){ //access database
-                withContext(Dispatchers.Main){
-                    val databaseEntries = dao.getData()
-                    if (databaseEntries.isEmpty()) {
-                        _ResponseData.value?.clear()
-                    } else {
-                        val newData = ArrayList<Reminder>()
-                        for(item in databaseEntries){
-                            newData.add(item)
-                        }
-                        _ResponseData.value = newData
-                    }
-                }
+            } else {
+                _AdviceData.postValue("API call failed.")
             }
         }
     }
-     */
 }
