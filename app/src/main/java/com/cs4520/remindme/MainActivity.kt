@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity() {
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = "home") {
             composable("home") {
-                Home(onNavigateToCreate = { navController.navigate("create") },
+                HomeScreen(onNavigateToCreate = { navController.navigate("create") },
                     onNavigateToList = {
                         viewModel.reflectDatabase()
                         viewModel.generateAdvice()
