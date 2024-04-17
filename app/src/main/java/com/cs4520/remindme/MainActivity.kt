@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
                 })
             }
             composable("detail") {
-                Detail()
+                Detail(onNavigateToList = {navController.navigate("list")})
             }
 
         }
@@ -308,11 +308,6 @@ class MainActivity : ComponentActivity() {
         selectedReminder = reminder
         run { onNavigateToDetail() }
     }
-    private fun deleteReminder() {
-        TODO("Delete Reminder from List")
-        //TODO: Go back to previous screen
-        //TODO: Remove reminder from database and API
-    }
 
     fun CategoryToImage(category: Category): Int {
         //TODO: Glide Images
@@ -333,7 +328,7 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun Detail(){
+    fun Detail(onNavigateToList: () -> Unit){
         Column (
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
@@ -379,9 +374,14 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.height(400.dp))
             }
 
-            Button(onClick = { /*deleteReminder()*/ }) {
+            Button(onClick = { deleteClicked(onNavigateToList) }) {
                 Text("Delete")
             }
         }
+    }
+
+    private fun deleteClicked(onNavigateToList: () -> Unit) {
+        viewModel.deleteReminder(selectedReminder)
+        run { onNavigateToList() }
     }
 }
