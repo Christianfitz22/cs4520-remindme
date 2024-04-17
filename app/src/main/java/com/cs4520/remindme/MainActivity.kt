@@ -273,7 +273,7 @@ class MainActivity : ComponentActivity() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                modifier = Modifier.size(56.dp)
+                modifier = Modifier.size(56.dp).testTag("Image")
                 .padding(end = 8.dp),
                 painter = painterResource(id = CategoryToImage(reminder.category)),
                 contentDescription = "Reminder Category Symbol")
@@ -281,7 +281,7 @@ class MainActivity : ComponentActivity() {
                 Text(
                     text = reminder.name,
                     fontSize = 18.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp).testTag("Name")
                 )
 
             Row(
@@ -290,7 +290,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 Button(
                     onClick = { reminderSelected(reminder, onNavigateToDetail) },
-                    modifier = Modifier.padding(end = 8.dp)) {
+                    modifier = Modifier.padding(end = 8.dp).testTag("Button")) {
                     Text("...")
                 }
             }

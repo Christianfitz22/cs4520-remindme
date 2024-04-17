@@ -21,6 +21,8 @@ import org.junit.runner.RunWith
 class UITestListScreen {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule
     val composeTestRule2 = createComposeRule()
 
     val rem = ArrayList<Reminder>()
