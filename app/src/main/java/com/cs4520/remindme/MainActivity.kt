@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,6 +73,9 @@ class MainActivity : ComponentActivity() {
         viewModelFactory = ReminderViewModelFactory()
         viewModel = ViewModelProvider(this, viewModelFactory)[ReminderViewModel::class.java]
 
+        viewModel.reflectDatabase()
+        viewModel.generateAdvice()
+
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -86,7 +90,12 @@ class MainActivity : ComponentActivity() {
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = "home") {
             composable("home") {
-                Home(onNavigateToCreate = { navController.navigate("create") }, onNavigateToList = {navController.navigate("list")})
+                Home(onNavigateToCreate = { navController.navigate("create") },
+                    onNavigateToList = {
+                        viewModel.reflectDatabase()
+                        viewModel.generateAdvice()
+                        navController.navigate("list")
+                    })
             }
             composable("create") {
                 Create()
@@ -205,14 +214,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                /*
-                Image(
-                    modifier = Modifier.size(56.dp)
-                        .padding(start = 8.dp, end = 8.dp),
-                    painter = painterResource(id = CategoryToImage(Category.valueOf(selectedCategory.uppercase()))),
-                    contentDescription = "Reminder Category Symbol")
-
-                 */
                 GlideImage(
                     model = CategoryConverter.ToURL(Category.valueOf(selectedCategory.uppercase())),
                     modifier = Modifier.size(56.dp)
@@ -260,13 +261,20 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun List(onNavigateToDetail: () -> Unit){
         val reminders by viewModel.ResponseData.observeAsState(listOf())
+        val advice by viewModel.AdviceData.observeAsState()
 
-        viewModel.reflectDatabase()
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(text = advice.toString(),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().height(40.dp).wrapContentHeight(Alignment.CenterVertically))
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            LazyColumn {
-                itemsIndexed(reminders) { index, reminder ->
-                    Preview(reminder, onNavigateToDetail)
+            Box(modifier = Modifier.fillMaxSize()) {
+                LazyColumn {
+                    itemsIndexed(reminders) { index, reminder ->
+                        Preview(reminder, onNavigateToDetail)
+                    }
                 }
             }
         }

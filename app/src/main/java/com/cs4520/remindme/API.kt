@@ -1,7 +1,6 @@
 package com.cs4520.remindme
 
 object API {
-    //TODO: replace with API
-    const val BASE_URL : String = ""
-    const val ENDPOINT : String = ""
+    const val BASE_URL : String = "https://isdayoff.ru/"
+    const val ENDPOINT : String = "today"
 }
