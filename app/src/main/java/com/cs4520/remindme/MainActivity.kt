@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
                 })
             }
             composable("detail") {
-                Detail(onNavigateToList = {navController.navigate("list")})
+                Detail(onNavigateToList = {navController.navigateUp()})
             }
 
         }
