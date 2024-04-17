@@ -21,14 +21,11 @@ class ReminderViewModel : ViewModel() {
     private val database = ReminderDatabase.getInstance()
 
     fun initialize() {
-        //createWorkBuilder()
-
         reflectDatabase()
         generateAdvice()
     }
 
     fun reflectDatabase() {
-        //TODO: coroutines
         val dao = database.reminderDAO();
         val databaseEntries = dao.getData();
 
