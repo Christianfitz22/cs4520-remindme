@@ -260,16 +260,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun Preview(reminder: Reminder, onNavigateToDetail: () -> Unit) {
-        var backgroundColor = Color(0xFFE06666)
-        if(reminder.category == Category.HOME){
-            backgroundColor = Color(0xFF656FFF)
-        }
-        if(reminder.category == Category.FAMILY){
-            backgroundColor = Color(0xFF4FB55C)
-        }
-        if(reminder.category == Category.PERSONAL){
-            backgroundColor = Color(0xFFBB6BF6)
-        }
+        var backgroundColor = CategoryToColor(reminder.category)
         Row(
             modifier = Modifier
                 .padding(16.dp)
@@ -326,6 +317,22 @@ class MainActivity : ComponentActivity() {
         return 0
     }
 
+    fun CategoryToColor(category: Category): Color {
+        if (category == Category.HOME) {
+            return Color(0xFF656FFF)
+        }
+        else if (category == Category.WORK) {
+            return Color(0xFFE06666)
+        }
+        else if (category == Category.FAMILY) {
+            return Color(0xFF4FB55C)
+        }
+        else if (category == Category.PERSONAL) {
+            return Color(0xFFBB6BF6)
+        }
+        return Color(0xFF656FFF)
+    }
+
 
     @Composable
     fun Detail(onNavigateToList: () -> Unit){
@@ -362,7 +369,7 @@ class MainActivity : ComponentActivity() {
             Box(contentAlignment = Alignment.Center,
             modifier = Modifier
                 .padding(8.dp)
-                .border(2.dp, Color.Blue, shape = RoundedCornerShape(4.dp))
+                .border(2.dp, CategoryToColor(selectedReminder.category), shape = RoundedCornerShape(4.dp))
                 .padding(8.dp)
                 .height(200.dp)
                 .width(500.dp)
