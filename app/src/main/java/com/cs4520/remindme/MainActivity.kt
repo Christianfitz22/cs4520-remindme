@@ -1,6 +1,7 @@
 package com.cs4520.remindme
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -62,6 +63,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        ReminderDatabase.setContext(applicationContext)
 
         viewModelFactory = ReminderViewModelFactory()
         viewModel = ViewModelProvider(this, viewModelFactory)[ReminderViewModel::class.java]
@@ -213,19 +216,38 @@ class MainActivity : ComponentActivity() {
                 onValueChange = { descText = it },
                 label = { Text("Description")})
 
-            Button(onClick = {}) {
+            Button(onClick = {
+                if (createClicked(nameText, descText, selectedCategory)) {
+                    nameText = ""
+                    descText = ""
+                    selectedCategory = categories[0]
+                }
+            }) {
                 Text("Create")
-                //TODO: Create Reminder, add to database and API
-                //TODO: Clear fields
-                //TODO: Toast if any fields are empty
             }
         }
+    }
+
+    private fun createClicked(nameText: String, descText: String, selectedCategory: String): Boolean {
+        if (nameText == "") {
+            Toast.makeText(applicationContext, "No name provided.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (descText == "") {
+            Toast.makeText(applicationContext, "No description provided.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        viewModel.addReminder(Reminder(nameText, Category.valueOf(selectedCategory.uppercase()), descText))
+        Toast.makeText(applicationContext, "New reminder created.", Toast.LENGTH_SHORT).show()
+        return true
     }
 
     //list of all reminders
     @Composable
     fun List(onNavigateToDetail: () -> Unit){
         val reminders by viewModel.ResponseData.observeAsState(listOf())
+
+        viewModel.reflectDatabase()
 
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn {

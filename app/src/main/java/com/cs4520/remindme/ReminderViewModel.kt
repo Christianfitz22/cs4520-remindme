@@ -12,16 +12,41 @@ import java.net.UnknownHostException
 class ReminderViewModel : ViewModel() {
     private val _ResponseData = MutableLiveData<ArrayList<Reminder>>()
     val ResponseData : LiveData<ArrayList<Reminder>> = _ResponseData
-    private val repository = DatabaseRepository()
+    //private val repository = DatabaseRepository()
 
     private val database = ReminderDatabase.getInstance()
 
     fun initialize() {
         //createWorkBuilder()
 
-        makeApiCall()
+        //makeApiCall()
+        reflectDatabase()
     }
 
+    fun reflectDatabase() {
+        val dao = database.reminderDAO();
+        val databaseEntries = dao.getData();
+
+        if (databaseEntries.isEmpty()) {
+            _ResponseData.value?.clear()
+        } else {
+            val newData = ArrayList<Reminder>()
+            for(item in databaseEntries){
+                newData.add(item)
+            }
+            _ResponseData.value = newData
+        }
+    }
+
+    fun addReminder(reminder: Reminder) {
+        database.reminderDAO().insert(reminder);
+    }
+
+    fun deleteReminder(reminder: Reminder) {
+        database.reminderDAO().delete(reminder);
+    }
+
+    /*
     private fun makeApiCall(input: String?=null) {
         val dao = database.reminderDAO()
 
@@ -60,4 +85,5 @@ class ReminderViewModel : ViewModel() {
             //TODO: if list empty, check database as well?
         }
     }
+     */
 }

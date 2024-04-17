@@ -10,10 +10,10 @@ import androidx.room.Update
 @Dao
 interface ReminderDAO {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(reminder: Reminder)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(reminders: List<Reminder>)
 
     @Update
