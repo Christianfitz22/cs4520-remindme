@@ -74,8 +74,7 @@ class MainActivity : ComponentActivity() {
         viewModelFactory = ReminderViewModelFactory()
         viewModel = ViewModelProvider(this, viewModelFactory)[ReminderViewModel::class.java]
 
-        viewModel.reflectDatabase()
-        viewModel.generateAdvice()
+        viewModel.initialize()
 
         setContent {
             MaterialTheme {
