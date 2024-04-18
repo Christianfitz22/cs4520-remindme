@@ -28,7 +28,6 @@ class ReminderViewModel : ViewModel() {
     }
 
     fun reflectDatabase() {
-        //TODO: coroutines
         val dao = database.reminderDAO();
         val databaseEntries = dao.getData();
 

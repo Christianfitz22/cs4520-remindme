@@ -13,18 +13,12 @@ interface ReminderDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(reminder: Reminder)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(reminders: List<Reminder>)
-
-    @Update
-    fun update(reminder: Reminder)
-
     @Delete
     fun delete(reminder: Reminder)
 
-    @Query("DELETE FROM reminders")
-    fun clearAll();
-
     @Query("SELECT * FROM reminders")
     fun getData(): List<Reminder>
+
+    @Query("DELETE FROM reminders")
+    fun clearAll()
 }
