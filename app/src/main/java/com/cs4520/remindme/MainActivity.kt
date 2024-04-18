@@ -74,8 +74,7 @@ class MainActivity : ComponentActivity() {
         viewModelFactory = ReminderViewModelFactory()
         viewModel = ViewModelProvider(this, viewModelFactory)[ReminderViewModel::class.java]
 
-        viewModel.reflectDatabase()
-        viewModel.generateAdvice()
+        viewModel.initialize()
 
         setContent {
             MaterialTheme {
@@ -271,13 +270,18 @@ class MainActivity : ComponentActivity() {
         ) {
             Text(text = advice.toString(),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().height(40.dp).wrapContentHeight(Alignment.CenterVertically))
+                modifier = Modifier.fillMaxWidth().height(40.dp).wrapContentHeight(Alignment.CenterVertically).testTag("Quote"))
 
-            Box(modifier = Modifier.fillMaxSize()) {
-                LazyColumn {
-                    itemsIndexed(reminders) { index, reminder ->
-                        Preview(reminder, onNavigateToDetail)
-                    }
+            DrawBox(reminders, onNavigateToDetail)
+        }
+    }
+
+    @Composable
+    fun DrawBox(reminders: List<Reminder>, onNavigateToDetail: () -> Unit){
+        Box(modifier = Modifier.fillMaxSize().testTag("Box")) {
+            LazyColumn {
+                itemsIndexed(reminders) { index, reminder ->
+                    Preview(reminder, onNavigateToDetail)
                 }
             }
         }

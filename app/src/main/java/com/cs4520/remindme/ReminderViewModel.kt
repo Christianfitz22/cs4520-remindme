@@ -4,25 +4,24 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.RoomDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 import java.net.UnknownHostException
 
-class ReminderViewModel : ViewModel() {
+class ReminderViewModel() : ViewModel() {
     private val _ResponseData = MutableLiveData<ArrayList<Reminder>>()
     val ResponseData : LiveData<ArrayList<Reminder>> = _ResponseData
-    //private val repository = DatabaseRepository()
 
     private val _AdviceData = MutableLiveData<String>()
     val AdviceData : LiveData<String> = _AdviceData
 
-    private val database = ReminderDatabase.getInstance()
+    lateinit var database : ReminderDatabase
 
     fun initialize() {
-        //createWorkBuilder()
-
+        database =  ReminderDatabase.getInstance()
         reflectDatabase()
         generateAdvice()
     }
@@ -38,7 +37,7 @@ class ReminderViewModel : ViewModel() {
             for(item in databaseEntries){
                 newData.add(item)
             }
-            _ResponseData.value = newData
+            _ResponseData.postValue(newData)
         }
     }
 
@@ -56,7 +55,7 @@ class ReminderViewModel : ViewModel() {
 
     fun generateAdvice() {
 
-        _AdviceData.value = ""
+        _AdviceData.postValue("")
 
         val service = RetrofitClient.getRetrofitInstance()
 
