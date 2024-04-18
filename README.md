@@ -13,3 +13,5 @@ The create reminder screen will allow the user to fill in three fields: Name, Ca
 The view reminder screen shows the list of previously created reminders. The player may scroll through the list and tap on any existing reminder, which brings them to the specific reminder screen. When viewing that reminder, the user can see the previously created reminder's name, description, and category, as well as being able to delete the reminder if it is completed.
 
 The App will also call an API to see if it is a national holiday and work is off, and tell the user so on the View Reminder screen. This will allow the user to better determine how urgent tasks are on their list, as well as if they have the time to do so.
+
+Unit tests are in the AndroidTest functionality as the room database requires a context, and the majority of our app relies on a room database.
