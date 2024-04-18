@@ -37,7 +37,7 @@ class ReminderViewModel() : ViewModel() {
             for(item in databaseEntries){
                 newData.add(item)
             }
-            _ResponseData.value = newData
+            _ResponseData.postValue(newData)
         }
     }
 
@@ -55,7 +55,7 @@ class ReminderViewModel() : ViewModel() {
 
     fun generateAdvice() {
 
-        _AdviceData.value = ""
+        _AdviceData.postValue("")
 
         val service = RetrofitClient.getRetrofitInstance()
 
